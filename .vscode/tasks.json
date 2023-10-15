@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cargo",
+			"command": "solve",
+			"args": ["${fileBasenameNoExtension}"],
+			"problemMatcher": ["$rustc"],
+			"label": "run rust"
+		},
+		{
+			"type": "cargo",
+			"command": "test",
+			"args": ["--bin", "${fileBasenameNoExtension}", "--", "--nocapture"],
+			"problemMatcher": ["$rustc"],
+			"label": "run test rust"
+		}
+	]
+}
