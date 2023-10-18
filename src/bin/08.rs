@@ -1,9 +1,13 @@
 use regex::Regex;
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref REGEX: Regex = Regex::new(r"(\\\W)|(\\x\w{2})|(\w)").unwrap();
+}
 
 fn calc_len(str: &str) -> u32 {
     let chars_len = str.len();
-    let regex = Regex::new(r"(\\\W)|(\\x\w{2})|(\w)").unwrap();
-    let captured = regex.find_iter(&str[1..chars_len-1]);
+    let captured = REGEX.find_iter(&str[1..chars_len-1]);
     (chars_len - captured.enumerate().count()) as u32
 }
 

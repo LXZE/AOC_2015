@@ -1,23 +1,25 @@
 use fancy_regex::Regex;
 
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref REGEX_VOWEL: Regex = Regex::new(r"[aeiou]").unwrap();
+    static ref REGEX_TWICE: Regex = Regex::new(r"(.)\1").unwrap();
+    static ref REGEX_INVALID: Regex = Regex::new(r"(ab|cd|pq|xy)").unwrap();
+    static ref REGEX_PAIR: Regex = Regex::new(r"(..).*\1").unwrap();
+    static ref REGEX_REPEAT: Regex = Regex::new(r"(.).\1").unwrap();
+}
+
 fn is_nice_part_one(str: &str) -> bool {
-    let regex_vowel = Regex::new(r"[aeiou]").unwrap();
-    if regex_vowel.find_iter(str).count() < 3 { return false }
-
-    let regex_twice = Regex::new(r"(.)\1").unwrap();
-    if !regex_twice.is_match(str).unwrap() { return false }
-
-    let regex_invalid = Regex::new(r"(ab|cd|pq|xy)").unwrap();
-    if regex_invalid.is_match(str).unwrap() { return false }
+    if REGEX_VOWEL.find_iter(str).count() < 3 { return false }
+    if !REGEX_TWICE.is_match(str).unwrap() { return false }
+    if REGEX_INVALID.is_match(str).unwrap() { return false }
     true
 }
 
 fn is_nice_part_two(str: &str) -> bool {
-    let regex_pair = Regex::new(r"(..).*\1").unwrap();
-    if !regex_pair.is_match(str).unwrap() { return false }
-
-    let regex_repeat = Regex::new(r"(.).\1").unwrap();
-    if !regex_repeat.is_match(str).unwrap() { return false }
+    if !REGEX_PAIR.is_match(str).unwrap() { return false }
+    if !REGEX_REPEAT.is_match(str).unwrap() { return false }
     true
 }
 

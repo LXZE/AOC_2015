@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use fancy_regex::Regex;
+use lazy_static::lazy_static;
 
 #[derive(Debug, Clone, PartialEq)]
 struct Expr<'a> {
@@ -9,18 +10,21 @@ struct Expr<'a> {
     target: &'a str,
 }
 
-fn parse_code(line: &str) -> Expr {
-    let stmt_regex = Regex::new(
+lazy_static! {
+    static ref STMT_REGEX: Regex = Regex::new(
         r"^(?<expr>.+)\s->\s(?<tgt>\D{1,2})$"
     ).unwrap();
-    let stmt_captured = stmt_regex.captures(line).unwrap().unwrap();
+    static ref EXPR_REGEX: Regex = Regex::new(
+        r"(?<l>(\D{1,2}|\d+)\s)?(?<ops>[A-Z]+\s)?(?<r>(\D{1,2}|\d+))"
+    ).unwrap();
+}
+
+fn parse_code(line: &str) -> Expr {
+    let stmt_captured = STMT_REGEX.captures(line).unwrap().unwrap();
     let expr = stmt_captured.name("expr").unwrap().as_str();
     let target = stmt_captured.name("tgt").unwrap().as_str();
 
-    let expr_regex = Regex::new(
-        r"(?<l>(\D{1,2}|\d+)\s)?(?<ops>[A-Z]+\s)?(?<r>(\D{1,2}|\d+))"
-    ).unwrap();
-    let expr_captured = expr_regex.captures(expr).unwrap().unwrap();
+    let expr_captured = EXPR_REGEX.captures(expr).unwrap().unwrap();
     match (expr_captured.name("l"), expr_captured.name("ops"), expr_captured.name("r")) {
         (Some(src_l), Some(ops), Some(src_r)) => Expr {
             src_l: src_l.as_str().trim(), ops: ops.as_str().trim(), src_r: src_r.as_str(), target
@@ -136,7 +140,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 
 pub fn part_two(input: &str) -> Option<u32> {
     let signal_a = part_one(input).unwrap().to_string();
-    
+
     let mut mem: HashMap<&str, u16> = HashMap::new();
     let mut codes: Vec<Expr> = input.trim_end().split("\n").map(parse_code).collect();
     codes.retain(|expr| expr.target != "b");
@@ -174,16 +178,16 @@ mod tests {
         assert_eq!(parse_code("y -> x"), Expr { ops: "ASSIGN", src_l: "", src_r: "y", target: "x" });
         assert_eq!(parse_code("y -> xy"), Expr { ops: "ASSIGN", src_l: "", src_r: "y", target: "xy" });
         assert_eq!(parse_code("yy -> xy"), Expr { ops: "ASSIGN", src_l: "", src_r: "yy", target: "xy" });
-        
+
         assert_eq!(parse_code("a AND b -> c"), Expr { ops: "AND", src_l: "a", src_r: "b", target: "c" });
         assert_eq!(parse_code("1 AND b -> c"), Expr { ops: "AND", src_l: "1", src_r: "b", target: "c" });
         assert_eq!(parse_code("a AND 1 -> c"), Expr { ops: "AND", src_l: "a", src_r: "1", target: "c" });
         assert_eq!(parse_code("aa AND bb -> cc"), Expr { ops: "AND", src_l: "aa", src_r: "bb", target: "cc" });
-        
+
         assert_eq!(parse_code("NOT 1 -> x"), Expr { ops: "NOT", src_l: "", src_r: "1", target: "x" });
         assert_eq!(parse_code("NOT a -> x"), Expr { ops: "NOT", src_l: "", src_r: "a", target: "x" });
         assert_eq!(parse_code("NOT aa -> x"), Expr { ops: "NOT", src_l: "", src_r: "aa", target: "x" });
-        
+
         let input = advent_of_code::read_file("examples", 7);
         assert_eq!(part_one(&input).unwrap(), 123);
     }
