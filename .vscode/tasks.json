@@ -4,7 +4,7 @@
 		{
 			"type": "cargo",
 			"command": "solve",
-			"args": ["${fileBasenameNoExtension}"],
+			"args": ["${fileBasenameNoExtension}", "-r"],
 			"problemMatcher": ["$rustc"],
 			"label": "run rust"
 		},
